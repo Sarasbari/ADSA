@@ -1,109 +1,69 @@
-import java.util.Scanner;
 
-public class HamiltonianCycle
-{
-    static final int MAX = 20;
+// Hamiltonian Cycle in Java
+import java.util.*;
 
-    // Function to print the Hamiltonian cycle
-    static void printCycle(int[] path, int n)
-    {
-        System.out.print("Hamiltonian Cycle found: ");
-        for (int i = 0; i < n; i++)
-        {
-            System.out.print(path[i] + " ");
-        }
-        System.out.println(path[0]); // Return to starting vertex
-    }
+public class HamiltonianCycle {
+    static int V; // number of vertices
 
-    // Function to check if vertex v can be added to the Hamiltonian Cycle
-    static boolean isSafe(int v, int[][] graph, int[] path, boolean[] visited, int pos)
-    {
-        // Check if this vertex is adjacent to the previous vertex in the path
+    // Check if vertex v can be added at position pos
+    static boolean isSafe(int v, int graph[][], int path[], int pos) {
+        // Check if adjacent to previous vertex
         if (graph[path[pos - 1]][v] == 0)
             return false;
 
-        // Check if vertex has already been included
-        if (visited[v])
-            return false;
+        // Check if already included
+        for (int i = 0; i < pos; i++)
+            if (path[i] == v)
+                return false;
 
         return true;
     }
 
-    // Recursive utility function to solve Hamiltonian Cycle problem
-    static boolean hamCycleUtil(int[][] graph, int[] path, boolean[] visited, int pos, int n)
-    {
-        // Base case: if all vertices are included in the path
-        if (pos == n)
-        {
-            // Check if last vertex connects back to the first vertex
+    // Recursive utility function
+    static boolean hamiltonianUtil(int graph[][], int path[], int pos) {
+        if (pos == V) {
+            // If last vertex is connected to first
             return graph[path[pos - 1]][path[0]] == 1;
         }
 
-        // Try different vertices as the next candidate
-        for (int v = 1; v < n; v++)
-        {
-            if (isSafe(v, graph, path, visited, pos))
-            {
+        for (int v = 1; v < V; v++) {
+            if (isSafe(v, graph, path, pos)) {
                 path[pos] = v;
-                visited[v] = true;
-
-                // Recur to construct rest of the path
-                if (hamCycleUtil(graph, path, visited, pos + 1, n))
+                if (hamiltonianUtil(graph, path, pos + 1))
                     return true;
-
-                // Backtrack
-                visited[v] = false;
-                path[pos] = -1;
+                path[pos] = -1; // backtrack
             }
         }
-
         return false;
     }
 
-    // Function to find a Hamiltonian Cycle
-    static void hamiltonianCycle(int[][] graph, int n)
-    {
-        int[] path = new int[MAX];
-        boolean[] visited = new boolean[MAX];
+    static void hamiltonianCycle(int graph[][]) {
+        int path[] = new int[V];
+        Arrays.fill(path, -1);
+        path[0] = 0; // start from vertex 0
 
-        // Initialize path
-        for (int i = 0; i < n; i++)
-        {
-            path[i] = -1;
-            visited[i] = false;
+        if (hamiltonianUtil(graph, path, 1)) {
+            System.out.println("Hamiltonian Cycle exists:");
+            for (int i = 0; i < V; i++)
+                System.out.print(path[i] + " ");
+            System.out.println(path[0]); // return to start
+        } else {
+            System.out.println("No Hamiltonian Cycle exists");
         }
-
-        // Start at vertex 0
-        path[0] = 0;
-        visited[0] = true;
-
-        // Solve the problem using backtracking
-        if (hamCycleUtil(graph, path, visited, 1, n))
-            printCycle(path, n);
-        else
-            System.out.println("No Hamiltonian Cycle found.");
     }
 
-    // Main function
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-
         System.out.print("Enter number of vertices: ");
-        int n = sc.nextInt();
+        V = sc.nextInt();
+        int graph[][] = new int[V][V];
 
-        int[][] graph = new int[n][n];
-
-        System.out.println("Enter adjacency matrix:");
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < n; j++)
-            {
+        System.out.println("Enter adjacency matrix (0/1):");
+        for (int i = 0; i < V; i++)
+            for (int j = 0; j < V; j++)
                 graph[i][j] = sc.nextInt();
-            }
-        }
 
-        hamiltonianCycle(graph, n);
+        hamiltonianCycle(graph);
 
         sc.close();
     }
